@@ -8,23 +8,27 @@ import CustomersPage from "./pages/CustomerPage";
 import InventoryPage from "./pages/Inventory";
 import ReportsPage from "./pages/ReportPage";
 import SettingsPage from "./pages/SettingsPage";
+import Login from "./pages/Login";
 
 function App() {
   return (
     <Router>
-      <MainLayout>
-        <Routes>
+      <Routes>
+        {/* Public Route */}
+        <Route path="/login" element={<Login />} />
+
+        {/* Protected Routes inside MainLayout */}
+        <Route element={<MainLayout />}>
           <Route path="/" element={<Dashboard />} />
           <Route path="/products" element={<Products />} />
           <Route path="/add-product" element={<AddProduct />} />
           <Route path="/orders" element={<OrdersPage />} />
           <Route path="/customers" element={<CustomersPage />} />
-          {/* <Route path="/coupons" element={<Coupons />} /> */}
           <Route path="/inventory" element={<InventoryPage />} />
           <Route path="/reports" element={<ReportsPage />} />
           <Route path="/settings" element={<SettingsPage />} />
-        </Routes>
-      </MainLayout>
+        </Route>
+      </Routes>
     </Router>
   );
 }

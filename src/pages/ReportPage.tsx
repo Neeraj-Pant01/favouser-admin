@@ -1,5 +1,3 @@
-import React from "react";
-
 export default function ReportsPage() {
   const summaryData = [
     { label: "Total Sales", value: "$124,500", color: "bg-green-100 text-green-700" },
