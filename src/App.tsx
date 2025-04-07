@@ -15,11 +15,11 @@ function App() {
     <Router>
       <Routes>
         {/* Public Route */}
-        <Route path="/login" element={<Login />} />
+        <Route path="/" element={<Login />} />
 
         {/* Protected Routes inside MainLayout */}
         <Route element={<MainLayout />}>
-          <Route path="/" element={<Dashboard />} />
+          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/products" element={<Products />} />
           <Route path="/add-product" element={<AddProduct />} />
           <Route path="/orders" element={<OrdersPage />} />

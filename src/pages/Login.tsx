@@ -27,7 +27,7 @@ const Login = () => {
 
     //   // Save token, redirect to dashboard, etc.
     //   localStorage.setItem('token', data.token);
-      window.location.href = '/'; // or use react-router
+      window.location.href = '/dashboard'; // or use react-router
 
     } catch (err: any) {
       setError(err.message);
