@@ -9,6 +9,7 @@ import InventoryPage from "./pages/Inventory";
 import ReportsPage from "./pages/ReportPage";
 import SettingsPage from "./pages/SettingsPage";
 import Login from "./pages/Login";
+import ProtectedRoute from "./componenets/ProtectedRoute";
 
 function App() {
   return (
@@ -18,7 +19,7 @@ function App() {
         <Route path="/" element={<Login />} />
 
         {/* Protected Routes inside MainLayout */}
-        <Route element={<MainLayout />}>
+        <Route element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/products" element={<Products />} />
           <Route path="/add-product" element={<AddProduct />} />

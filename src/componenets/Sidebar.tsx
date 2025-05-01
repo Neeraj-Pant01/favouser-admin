@@ -51,6 +51,17 @@ export default function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose:
             </Link>
           );
         })}
+        <button
+        onClick={()=>{
+          localStorage.clear();
+          window.location.href = '/'
+        }}
+              className={`
+                block px-4 py-2 rounded-lg text-sm font-medium transition-colors text-gray-700 hover:bg-gray-100 hover:text-blue-600"
+              `}
+            >
+              LogOut
+            </button>
       </nav>
     </div>
   );

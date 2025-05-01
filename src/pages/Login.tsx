@@ -1,5 +1,8 @@
 // src/pages/Login.tsx
 import React, { useState } from 'react';
+import { loginAdmin } from '../utils/auth';
+import { useDispatch } from 'react-redux';
+import { login } from '../redux/userSlice';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -8,28 +11,30 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  const dispatch = useDispatch();
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
 
     try {
-    //   // Example login API call (replace with your actual call)
-    //   const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/login`, {
-    //     method: 'POST',
-    //     headers: { 'Content-Type': 'application/json' },
-    //     body: JSON.stringify({ email, password }),
-    //   });
-
-    //   const data = await response.json();
-
-    //   if (!response.ok) throw new Error(data.message || 'Login failed');
-
-    //   // Save token, redirect to dashboard, etc.
-    //   localStorage.setItem('token', data.token);
-      window.location.href = '/dashboard'; // or use react-router
-
+      setLoading(true)
+      // Example login API call (replace with your actual call)
+      const response = await loginAdmin({ email, password }) as {
+        status: number;
+        data: Record<string, any>; // allows any structure
+      };      
+      // console.log(response.data )
+      if(response.status==200){
+        dispatch(login(response.data))
+        window.location.href = '/dashboard';
+      }else{
+        setError('invalid email or password !')
+      }
+      setLoading(false)
     } catch (err: any) {
+      console.log('err', err)
       setError(err.message);
     } finally {
       setLoading(false);
