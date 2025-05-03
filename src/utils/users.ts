@@ -1,10 +1,10 @@
 import { makeApiReuest } from "./makeApiReuest"
-export const getProducts = async (token : any) =>{
+export const getusers = async (token : any) =>{
     const api = makeApiReuest(token)
     try{
-        const response = (await api).get('/products/admin/list')
+        const response = (await api).get('/user/admin/all')
         return response
     }catch(err){
         return err
     }
-}
+} 

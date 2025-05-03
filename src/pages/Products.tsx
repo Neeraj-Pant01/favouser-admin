@@ -1,32 +1,6 @@
-import { useState, useMemo } from "react";
-
-export const sampleProducts = [
-    {
-      id: 1,
-      name: "Graphic T-Shirt",
-      category: "T-Shirts",
-      price: 25,
-      stock: 34,
-      status: "Active",
-    },
-    {
-      id: 2,
-      name: "Custom Cap",
-      category: "Caps",
-      price: 15,
-      stock: 10,
-      status: "Inactive",
-    },
-    {
-      id: 3,
-      name: "Phone Grip",
-      category: "Accessories",
-      price: 8,
-      stock: 70,
-      status: "Active",
-    },
-    // Add more products as needed...
-  ];
+import { useState, useMemo, useEffect } from "react";
+import { getProducts } from "../utils/products";
+import { useSelector } from "react-redux";
   
 
 export default function Products() {
@@ -35,36 +9,42 @@ export default function Products() {
   const [statusFilter, setStatusFilter] = useState("All");
   const [sortKey, setSortKey] = useState("");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  const [products, setProducts] = useState<any[]>([]);
+  
+  
+  const token = useSelector((state:any)=>state.user.loggedUser.token)
+
+  useEffect(()=>{
+    const allProducts = async () =>{
+      try{
+        const response = await getProducts(token) as {
+          status: number;
+          data: any[];
+        };
+        // console.log(response.data)
+        setProducts(response.data);
+      }catch(err){
+        console.log(err)
+      }
+    }
+    allProducts();
+  },[])
 
   const filtered = useMemo(() => {
-    let result = [...sampleProducts];
+    let result = [...products];
 
     if (search) {
       result = result.filter((p) =>
-        p.name.toLowerCase().includes(search.toLowerCase())
+        p.productName.toLowerCase().includes(search.toLowerCase())
       );
     }
 
     if (categoryFilter !== "All") {
-      result = result.filter((p) => p.category === categoryFilter);
-    }
-
-    if (statusFilter !== "All") {
-      result = result.filter((p) => p.status === statusFilter);
-    }
-
-    if (sortKey) {
-      result.sort((a, b) => {
-        const aValue = a[sortKey as keyof typeof a];
-        const bValue = b[sortKey as keyof typeof b];
-        if (aValue < bValue) return sortOrder === "asc" ? -1 : 1;
-        if (aValue > bValue) return sortOrder === "asc" ? 1 : -1;
-        return 0;
-      });
+      result = result.filter((p) => p.categories.includes(categoryFilter));
     }
 
     return result;
-  }, [search, categoryFilter, statusFilter, sortKey, sortOrder]);
+  }, [search, categoryFilter,products]);
 
   const toggleSort = (key: string) => {
     if (sortKey === key) {
@@ -114,6 +94,9 @@ export default function Products() {
         <table className="min-w-full text-sm text-left">
           <thead className="bg-gray-100 text-gray-700">
             <tr>
+            <th className="p-3 cursor-pointer" >
+              Icon
+              </th>
               <th className="p-3 cursor-pointer" onClick={() => toggleSort("name")}>
                 Name {sortKey === "name" ? (sortOrder === "asc" ? "↑" : "↓") : ""}
               </th>
@@ -131,19 +114,20 @@ export default function Products() {
           <tbody>
             {filtered.map((p) => (
               <tr key={p.id} className="border-t hover:bg-gray-50">
-                <td className="p-3">{p.name}</td>
-                <td className="p-3">{p.category}</td>
-                <td className="p-3">${p.price}</td>
-                <td className="p-3">{p.stock}</td>
+                <td className="p-3"><img src={p?.coverImage} className="w-[30px] h-[30px] rounded-lg" alt="" /></td>
+                <td className="p-3">{p?.productName}</td>
+                <td className="p-3">{p?.categories.map((c : any,i:number)=><span key={i}>{c},</span>)}</td>
+                <td className="p-3">₹{p?.price}</td>
+                <td className="p-3">{p?.inStocks}</td>
                 <td className="p-3">
                   <span
                     className={`px-2 py-1 text-xs rounded ${
-                      p.status === "Active"
+                      p?.inStocks > 0
                         ? "bg-green-100 text-green-600"
                         : "bg-red-100 text-red-600"
                     }`}
                   >
-                    {p.status}
+                    {p?.inStocks > 0 ? "Active" : "Inactive"}
                   </span>
                 </td>
                 <td className="p-3 space-x-2">

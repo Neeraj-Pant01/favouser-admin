@@ -1,50 +1,38 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+import { getOrders } from "../utils/Orders";
+import { Link } from "react-router-dom";
 
-const sampleOrders = [
-  {
-    id: "ORD001",
-    buyer: {
-      name: "John Doe",
-      email: "john@example.com",
-      phone: "+1 234 567 890",
-      address: "123 Main St, Springfield",
-    },
-    status: "Delivered",
-    total: 89.99,
-    date: "2025-04-01",
-    items: [
-      { name: "Printed T-Shirt", qty: 2, price: 25 },
-      { name: "Cap", qty: 1, price: 15 },
-    ],
-  },
-  {
-    id: "ORD002",
-    buyer: {
-      name: "Jane Smith",
-      email: "jane@example.com",
-      phone: "+1 111 222 333",
-      address: "789 Ocean Dr, Miami",
-    },
-    status: "Pending",
-    total: 49.99,
-    date: "2025-04-05",
-    items: [
-      { name: "Custom Hoodie", qty: 1, price: 49.99 },
-    ],
-  },
-  // Add more dummy orders...
-];
 
 export default function OrdersPage() {
   const [selectedStatus, setSelectedStatus] = useState("");
   const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
   const [sortBy, setSortBy] = useState("date");
+  const [orders, setOrders] = useState<any>([])
 
-  const filteredOrders = sampleOrders
-    .filter(order => (selectedStatus ? order.status === selectedStatus : true))
-    .sort((a, b) => {
-      if (sortBy === "total") return b.total - a.total;
-      if (sortBy === "date") return new Date(b.date).getTime() - new Date(a.date).getTime();
+  const token = useSelector((state:any)=>state.user.loggedUser.token)
+
+    useEffect(()=>{
+      const listOrders = async () =>{
+        try{
+          const response = await getOrders(token) as {
+            status: number;
+            data: any[];
+          };
+          // console.log(response.data)
+          setOrders(response.data);
+        }catch(err){
+          console.log(err)
+        }
+      }
+      listOrders();
+    },[])
+
+  const filteredOrders = orders
+    .filter((order:any) => (selectedStatus ? order.status === selectedStatus : true))
+    .sort((a:any, b:any) => {
+      if (sortBy === "total") return b.amount - a.amount;
+      if (sortBy === "date") return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
       return 0;
     });
 
@@ -60,8 +48,9 @@ export default function OrdersPage() {
           onChange={(e) => setSelectedStatus(e.target.value)}
         >
           <option value="">All Status</option>
-          <option value="Pending">Pending</option>
-          <option value="Delivered">Delivered</option>
+          <option value="pending">pending</option>
+          <option value="delivered">delivered</option>
+          <option value="shipped">shipped</option>
         </select>
 
         <select
@@ -80,7 +69,7 @@ export default function OrdersPage() {
           <thead className="bg-gray-100 text-sm text-gray-600">
             <tr>
               <th className="p-3 text-left">Order ID</th>
-              <th className="p-3 text-left">Buyer</th>
+              <th className="p-3 text-left">Buyer ID</th>
               <th className="p-3 text-left">Total</th>
               <th className="p-3 text-left">Status</th>
               <th className="p-3 text-left">Date</th>
@@ -88,18 +77,18 @@ export default function OrdersPage() {
             </tr>
           </thead>
           <tbody>
-            {filteredOrders.map(order => (
+            {filteredOrders.map((order:any) => (
               <tr key={order.id} className="border-t text-sm">
-                <td className="p-3">{order.id}</td>
-                <td className="p-3">{order.buyer.name}</td>
-                <td className="p-3">${order.total.toFixed(2)}</td>
+                <td className="p-3">{order?._id}</td>
+                <td className="p-3">{order?.userId}</td>
+                <td className="p-3">₹{order?.amount?.toFixed(2)}</td>
                 <td className="p-3">
                   <span className={`px-2 py-1 rounded text-xs font-medium
                     ${order.status === "Pending" ? "bg-yellow-100 text-yellow-800" : "bg-green-100 text-green-800"}`}>
                     {order.status}
                   </span>
                 </td>
-                <td className="p-3">{order.date}</td>
+                <td className="p-3">{new Date(order?.createdAt).toLocaleDateString()}</td>
                 <td className="p-3 text-center">
                   <button
                     onClick={() => setSelectedOrder(order)}
@@ -132,25 +121,31 @@ export default function OrdersPage() {
 
             <div className="mb-4">
               <h4 className="text-sm font-medium text-gray-600">Buyer Info</h4>
-              <p><strong>Name:</strong> {selectedOrder.buyer.name}</p>
-              <p><strong>Email:</strong> {selectedOrder.buyer.email}</p>
-              <p><strong>Phone:</strong> {selectedOrder.buyer.phone}</p>
-              <p><strong>Address:</strong> {selectedOrder.buyer.address}</p>
+              <p><strong>Name:</strong> {selectedOrder?.buyer?.name || "NA"}</p>
+              <p><strong>Email:</strong> {selectedOrder?.buyer?.email || "NA"}</p>
+              <p><strong>Phone:</strong> {selectedOrder?.mobileNumber || 'NA'}</p>
+              <p><strong>Address:</strong> {selectedOrder?.address || "NA"}</p>
+              <p><strong>LandMark:</strong> {selectedOrder?.landmark || "NA"}</p>
+              <p><strong>Area:</strong> {selectedOrder?.area || "NA"}</p>
+              <p><strong>state:</strong> {selectedOrder?.state || "NA"}</p>
+
+              <p><strong>PinCode:</strong> {selectedOrder?.pincode || "NA"}</p>
+              <p><strong>Quantity:</strong> {selectedOrder?.quantity || "NA"}</p>
+
             </div>
 
             <div>
-              <h4 className="text-sm font-medium text-gray-600 mb-2">Items</h4>
-              <ul className="space-y-2">
-                {selectedOrder.items.map((item: any, i: number) => (
-                  <li key={i} className="text-sm">
-                    🛍️ {item.name} — Qty: {item.qty} — ${item.price}
+              <h4 className="text-sm font-medium text-gray-600 mb-2">Item</h4>
+                  <li className="text-sm flex items-center gap-3">
+                    {
+                      selectedOrder?.productId
+                    }
+                    <Link className="text-blue-500 underline" to={`/${selectedOrder?.productId}`}>Visit</Link>
                   </li>
-                ))}
-              </ul>
             </div>
 
             <div className="mt-4 font-medium text-right text-gray-700">
-              Total: ${selectedOrder.total.toFixed(2)}
+              Total: ₹{selectedOrder?.amount?.toFixed(2)}
             </div>
           </div>
         </div>

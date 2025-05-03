@@ -1,40 +1,38 @@
-import  { useState } from "react";
+import  { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+import { getusers } from "../utils/users";
 
-const customers = [
-  {
-    id: "CUST001",
-    name: "Alice Johnson",
-    email: "alice@example.com",
-    phone: "+1 555 987 654",
-    address: "123 Maple St, New York",
-    status: "Active",
-    orders: 12,
-    joined: "2024-11-15",
-    totalSpent: 1200,
-  },
-  {
-    id: "CUST002",
-    name: "Mark Lewis",
-    email: "mark@example.com",
-    phone: "+1 444 321 000",
-    address: "45 Oak St, Texas",
-    status: "Inactive",
-    orders: 3,
-    joined: "2023-09-10",
-    totalSpent: 150,
-  },
-];
 
 export default function CustomersPage() {
   const [selectedCustomer, setSelectedCustomer] = useState<any | null>(null);
   const [statusFilter, setStatusFilter] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
+  const [users, setUsers] = useState<any>([])
 
-  const filtered = customers.filter((cust) => {
+
+  const token = useSelector((state:any)=>state.user.loggedUser.token)
+
+  useEffect(()=>{
+    const listOrders = async () =>{
+      try{
+        const response = await getusers(token) as {
+          status: number;
+          data: any[];
+        };
+        // console.log(response.data)
+        setUsers(response.data);
+      }catch(err){
+        console.log(err)
+      }
+    }
+    listOrders();
+  },[])
+
+  const filtered = users.filter((cust:any) => {
     return (
       (statusFilter ? cust.status === statusFilter : true) &&
-      (cust.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        cust.email.toLowerCase().includes(searchTerm.toLowerCase()))
+      (cust?.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        cust?.email.toLowerCase().includes(searchTerm.toLowerCase()))
     );
   });
 
@@ -69,20 +67,20 @@ export default function CustomersPage() {
             <tr>
               <th className="p-3 text-left">Customer</th>
               <th className="p-3 text-left">Email</th>
-              <th className="p-3 text-left">Orders</th>
-              <th className="p-3 text-left">Total Spent</th>
+              <th className="p-3 text-left">Mobile</th>
+              {/* <th className="p-3 text-left">Total Spent</th> */}
               <th className="p-3 text-left">Status</th>
               <th className="p-3 text-left">Joined</th>
               <th className="p-3 text-center">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {filtered.map((cust) => (
+            {filtered.map((cust:any) => (
               <tr key={cust.id} className="border-t text-sm">
-                <td className="p-3 font-medium">{cust.name}</td>
+                <td className="p-3 font-medium">{cust?.username}</td>
                 <td className="p-3">{cust.email}</td>
-                <td className="p-3">{cust.orders}</td>
-                <td className="p-3">${cust.totalSpent.toFixed(2)}</td>
+                <td className="p-3">{cust?.mobile}</td>
+                {/* <td className="p-3">${cust.totalSpent.toFixed(2)}</td> */}
                 <td className="p-3">
                   <span
                     className={`px-2 py-1 rounded text-xs font-medium ${
@@ -94,7 +92,7 @@ export default function CustomersPage() {
                     {cust.status}
                   </span>
                 </td>
-                <td className="p-3">{cust.joined}</td>
+                <td className="p-3">{new Date(cust.createdAt).toLocaleDateString()}</td>
                 <td className="p-3 text-center">
                   <button
                     onClick={() => setSelectedCustomer(cust)}
@@ -131,14 +129,14 @@ export default function CustomersPage() {
             </div>
 
             <div className="text-sm">
-              <p><strong>Name:</strong> {selectedCustomer.name}</p>
+              <p><strong>Name:</strong> {selectedCustomer.username}</p>
               <p><strong>Email:</strong> {selectedCustomer.email}</p>
-              <p><strong>Phone:</strong> {selectedCustomer.phone}</p>
-              <p><strong>Address:</strong> {selectedCustomer.address}</p>
-              <p><strong>Status:</strong> {selectedCustomer.status}</p>
-              <p><strong>Orders:</strong> {selectedCustomer.orders}</p>
-              <p><strong>Total Spent:</strong> ${selectedCustomer.totalSpent.toFixed(2)}</p>
-              <p><strong>Joined:</strong> {selectedCustomer.joined}</p>
+              <p><strong>Phone:</strong> {selectedCustomer.mobile}</p>
+              <p><strong>Pincode:</strong> {selectedCustomer.pincode}</p>
+              {/* <p><strong>Status:</strong> {selectedCustomer.status}</p> */}
+              {/* <p><strong>Orders:</strong> {selectedCustomer.orders}</p> */}
+              {/* <p><strong>Total Spent:</strong> ${selectedCustomer.totalSpent.toFixed(2)}</p> */}
+              <p><strong>Joined:</strong> {new Date(selectedCustomer?.createdAt).toLocaleDateString()}</p>
             </div>
           </div>
         </div>

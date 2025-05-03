@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import MainLayout from "./componenets/MainLayout";
 import Dashboard from "./pages/Dashboard";
 import Products from "./pages/Products";
@@ -10,13 +10,15 @@ import ReportsPage from "./pages/ReportPage";
 import SettingsPage from "./pages/SettingsPage";
 import Login from "./pages/Login";
 import ProtectedRoute from "./componenets/ProtectedRoute";
+import { useSelector } from "react-redux";
 
 function App() {
+  const user = useSelector((state: any) => state.user.loggedUser);
   return (
     <Router>
       <Routes>
         {/* Public Route */}
-        <Route path="/" element={<Login />} />
+        <Route path="/" element={!user ? <Login /> : <Navigate to={'/dashboard'} />} />
 
         {/* Protected Routes inside MainLayout */}
         <Route element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
