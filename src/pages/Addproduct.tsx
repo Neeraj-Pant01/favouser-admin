@@ -1,4 +1,7 @@
 import { useState } from "react";
+import { uploadNewProduct } from "../utils/products";
+import { useSelector } from "react-redux";
+import Loader from "../componenets/Loader";
 
 export default function AddProduct() {
   const [formData, setFormData] = useState({
@@ -13,9 +16,13 @@ export default function AddProduct() {
     inStocks: "",
   });
 
+  const token = useSelector((state:any)=>state.user.loggedUser.token)
+
   const [newImage, setNewImage] = useState("");
   const [newCategory, setNewCategory] = useState("");
   const [newColor, setNewColor] = useState("");
+  const [loading, setLoading] = useState(false)
+  const [productImage, setProductImage] = useState()
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData((prev) => ({
@@ -41,7 +48,7 @@ export default function AddProduct() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
+    setLoading(true)
     const payload = {
       ...formData,
       price: Number(formData.price),
@@ -50,12 +57,33 @@ export default function AddProduct() {
       starNumber: 0,
       sales: 0,
     };
-
-    console.log("Sending to backend:", payload);
+    try{
+      const response = await uploadNewProduct(token, payload)
+      console.log(response)
+      setLoading(false)
+      setFormData({
+        productName: "",
+        productDesc: "",
+        price: "",
+        coverImage: "",
+        images: [] as string[],
+        categories: [] as string[],
+        defaultColor: "",
+        avilableColors: [] as string[],
+        inStocks: "",
+      });
+    }catch(err){
+      console.log(err)
+      setLoading(false)
+    }
   };
 
   return (
     <div className=" mx-auto">
+      {
+        loading &&
+      <Loader />
+      }
       <h2 className="text-2xl font-semibold mb-2">Add New Product</h2>
       <form
         onSubmit={handleSubmit}
@@ -101,12 +129,16 @@ export default function AddProduct() {
 
         {/* Cover Image */}
         <div>
-          <label className="block mb-1 font-medium">Cover Image URL</label>
+          <label className="block mb-1 font-medium">Cover Image</label>
+          {
+            productImage &&
+            <img src={URL.createObjectURL(productImage)} alt="product image" className="h-[300px]" />
+          }
           <input
-            type="text"
+            type="file"
             name="coverImage"
             required
-            value={formData.coverImage}
+            onRateChange={(e:any)=>setProductImage(e.target.files[0])}
             onChange={handleChange}
             className="w-full border px-3 py-2 rounded"
           />
@@ -245,10 +277,13 @@ export default function AddProduct() {
         {/* Submit */}
         <div className="md:col-span-2">
           <button
+          disabled={loading}
             type="submit"
             className="w-full bg-green-600 text-white py-3 rounded mt-4 hover:bg-green-700"
           >
-            Add Product
+            {
+              loading ? 'uploading...' : "Add Product"
+            }
           </button>
         </div>
       </form>

@@ -8,3 +8,14 @@ export const getProducts = async (token : any) =>{
         return err
     }
 }
+
+
+export const uploadNewProduct = async (token: any, product:any) =>{
+    const api = makeApiReuest(token)
+    try{
+        const response = (await api).post(`/products/`, product)
+        return response;
+    }catch(err){
+        return err
+    }
+}
