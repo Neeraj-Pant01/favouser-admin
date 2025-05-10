@@ -1,6 +1,7 @@
-import  { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { getusers } from "../utils/users";
+import { MdDelete } from "react-icons/md";
 
 
 export default function CustomersPage() {
@@ -8,27 +9,38 @@ export default function CustomersPage() {
   const [statusFilter, setStatusFilter] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [users, setUsers] = useState<any>([])
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
 
-  const token = useSelector((state:any)=>state.user.loggedUser.token)
+  const token = useSelector((state: any) => state.user.loggedUser.token)
 
-  useEffect(()=>{
-    const listOrders = async () =>{
-      try{
+  useEffect(() => {
+    const listOrders = async () => {
+      try {
         const response = await getusers(token) as {
           status: number;
           data: any[];
         };
         // console.log(response.data)
         setUsers(response.data);
-      }catch(err){
+      } catch (err) {
         console.log(err)
       }
     }
     listOrders();
-  },[])
+  }, [])
 
-  const filtered = users.filter((cust:any) => {
+  const handleDeleteCustomer = async (customerId: string) => {
+    setConfirmDeleteId(customerId)
+    try{
+
+    }catch(err){
+      console.log(err)
+    }
+  };
+
+
+  const filtered = users.filter((cust: any) => {
     return (
       (statusFilter ? cust.status === statusFilter : true) &&
       (cust?.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -75,7 +87,7 @@ export default function CustomersPage() {
             </tr>
           </thead>
           <tbody>
-            {filtered.map((cust:any) => (
+            {filtered.map((cust: any) => (
               <tr key={cust.id} className="border-t text-sm">
                 <td className="p-3 font-medium">{cust?.username}</td>
                 <td className="p-3">{cust.email}</td>
@@ -83,22 +95,26 @@ export default function CustomersPage() {
                 {/* <td className="p-3">${cust.totalSpent.toFixed(2)}</td> */}
                 <td className="p-3">
                   <span
-                    className={`px-2 py-1 rounded text-xs font-medium ${
-                      cust.status === "Active"
-                        ? "bg-green-100 text-green-700"
+                    className={`px-2 py-1 rounded text-xs font-medium ${cust.statu ? cust.statu : "Active"} === "Active"
+                        ? "bg-green-200 text-green-700"
                         : "bg-gray-200 text-gray-600"
                     }`}
                   >
-                    {cust.status}
+                    {cust.status || 'active'}
                   </span>
                 </td>
                 <td className="p-3">{new Date(cust.createdAt).toLocaleDateString()}</td>
-                <td className="p-3 text-center">
+                <td className="p-3 flex items-center justify-center gap-2 text-center">
                   <button
                     onClick={() => setSelectedCustomer(cust)}
                     className="text-blue-600 hover:underline text-sm"
                   >
                     View
+                  </button>
+                  <button className="cursor-pointer hover:scale-125 transition-all"
+                    onClick={() => handleDeleteCustomer(cust?._id)}
+                  >
+                    <MdDelete className="text-red-500 text-xl font-bold" />
                   </button>
                 </td>
               </tr>
@@ -113,6 +129,43 @@ export default function CustomersPage() {
           </tbody>
         </table>
       </div>
+
+      {confirmDeleteId && (
+        <div className="fixed inset-0 z-50 bg-black bg-opacity-40 flex items-center justify-center">
+          <div className="bg-white rounded-lg shadow-lg p-6 w-[90%] md:w-[400px]">
+            <h2 className="text-lg font-semibold mb-4 text-center">🗑️ Delete Customer?</h2>
+            <p className="text-sm text-gray-600 text-center mb-6">
+              Are you sure you want to delete this customer? This action cannot be undone.
+            </p>
+            <div className="flex justify-center gap-4">
+              <button
+                onClick={() => setConfirmDeleteId(null)}
+                className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 text-gray-800 text-sm font-medium"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={async () => {
+                  try {
+                    // TODO: replace with API call
+                    // await deleteCustomer(token, confirmDeleteId);
+
+                    setUsers((prev: any[]) => prev.filter(user => user.id !== confirmDeleteId));
+                    setConfirmDeleteId(null);
+                  } catch (err) {
+                    console.error("Delete failed:", err);
+                    alert("Failed to delete customer.");
+                  }
+                }}
+                className="px-4 py-2 rounded bg-red-500 hover:bg-red-600 text-white text-sm font-medium"
+              >
+                Yes, Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
 
       {/* Modal for Customer Details */}
       {selectedCustomer && (
