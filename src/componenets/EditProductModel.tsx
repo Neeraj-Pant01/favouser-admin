@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { uploadItemImage } from "../utils/uploads/uploadSingleImage";
 import { updateProduct } from "../utils/products";
 import Loader from "../componenets/Loader";
+import ColorManager from "./ColorManager";
 
 interface EditProductModalProps {
   token: string;
@@ -22,6 +23,7 @@ export default function EditProductModal({
   const [newImages, setNewImages] = useState<File[]>([]);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const [availableColors, setAvailableColors] = useState([...product?.avilableColors || []])
 
   useEffect(() => {
     setFormData({ ...product });
@@ -79,6 +81,7 @@ export default function EditProductModal({
         inStocks: Number(formData.inStocks),
         coverImage,
         images,
+        avilableColors : availableColors
       };
 
       const res: any = await updateProduct(token, formData._id, payload);
@@ -95,6 +98,7 @@ export default function EditProductModal({
     }
     setLoading(false);
   };
+
 
   return (
     <div className="fixed inset-0 z-50 bg-black bg-opacity-30 flex items-center justify-center">
@@ -151,6 +155,26 @@ export default function EditProductModal({
             className="w-full border px-3 py-2 rounded"
           />
         </div>
+
+        <div className="mb-4">
+          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="offer">
+            Discount Offer (%)
+          </label>
+          <input
+            type="text"
+            id="offer"
+            name="offer"
+            value={formData?.offer}
+            onChange={handleChange}
+            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            placeholder="Enter discount percentage"
+          />
+        </div>
+
+        <ColorManager 
+        availableColors={availableColors} setAvailableColors={setAvailableColors}
+      />
+
 
         {/* Cover Image */}
         <div>
