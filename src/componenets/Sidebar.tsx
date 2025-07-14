@@ -6,6 +6,7 @@ const links = [
   { name: "Add Product", path: "/add-product" },
   { name: "Orders", path: "/orders" },
   { name: "Customers", path: "/customers" },
+  { name: "Feedbacks", path: "/feedback" },
 //   { name: "Coupons", path: "/coupons" },
   { name: "Inventory", path: "/inventory" },
   { name: "Reports", path: "/reports" },

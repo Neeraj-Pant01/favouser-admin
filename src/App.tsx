@@ -11,6 +11,7 @@ import SettingsPage from "./pages/SettingsPage";
 import Login from "./pages/Login";
 import ProtectedRoute from "./componenets/ProtectedRoute";
 import { useSelector } from "react-redux";
+import Feedback from "./pages/Feedback";
 
 function App() {
   const user = useSelector((state: any) => state.user.loggedUser);
@@ -30,6 +31,7 @@ function App() {
           <Route path="/inventory" element={<InventoryPage />} />
           <Route path="/reports" element={<ReportsPage />} />
           <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/feedback" element={<Feedback />} />
         </Route>
       </Routes>
     </Router>

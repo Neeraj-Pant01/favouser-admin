@@ -9,6 +9,7 @@ export default function OrdersPage() {
   const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
   const [sortBy, setSortBy] = useState("date");
   const [orders, setOrders] = useState<any>([])
+  const [cancelled, setCancelled] = useState<any>()
 
   const token = useSelector((state:any)=>state.user.loggedUser.token)
 
@@ -29,7 +30,7 @@ export default function OrdersPage() {
     },[])
 
   const filteredOrders = orders
-    .filter((order:any) => (selectedStatus ? order.status === selectedStatus : true))
+    .filter((order:any) => (selectedStatus ? order.status === selectedStatus : true) && (cancelled ? order.isCancelled === true : order.isCancelled === false))
     .sort((a:any, b:any) => {
       if (sortBy === "total") return b.amount - a.amount;
       if (sortBy === "date") return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
@@ -55,6 +56,15 @@ export default function OrdersPage() {
 
         <select
           className="border p-2 rounded w-full md:w-1/3"
+          value={cancelled ? "true" : "false"}
+          onChange={(e) => setCancelled(e.target.value === "true")}
+        >
+          <option value="false">Active</option>
+          <option value="true">Cancelled</option>
+        </select>
+
+        <select
+          className="border p-2 rounded w-full md:w-1/3"
           value={sortBy}
           onChange={(e) => setSortBy(e.target.value)}
         >
@@ -71,7 +81,8 @@ export default function OrdersPage() {
               <th className="p-3 text-left">Order ID</th>
               <th className="p-3 text-left">Buyer ID</th>
               <th className="p-3 text-left">Total</th>
-              <th className="p-3 text-left">Status</th>
+              <th className="p-3 text-left">Payment</th>
+              <th className="p-3 text-left">Order Status</th>
               <th className="p-3 text-left">Date</th>
               <th className="p-3 text-center">Actions</th>
             </tr>
@@ -82,16 +93,27 @@ export default function OrdersPage() {
                 <td className="p-3">{order?._id}</td>
                 <td className="p-3">{order?.userId}</td>
                 <td className="p-3">₹{order?.amount?.toFixed(2)}</td>
-                <td className="p-3">
+                
+                 <td className="p-3">
                   <span className={`px-2 py-1 rounded text-xs font-medium
                     ${order.status === "Pending" ? "bg-yellow-100 text-yellow-800" : "bg-green-100 text-green-800"}`}>
                     {order.status}
                   </span>
                 </td>
+
+                <td className="p-3">
+                  <span className={`px-2 py-1 rounded text-xs font-medium
+                    ${order.isCancelled  ? "bg-red-100 text-red-500" : "bg-green-100 text-green-800"}`}>
+                    {order.isCancelled ? 'Cancelled' : 'Active'}
+                  </span>
+                </td>
+
                 <td className="p-3">{new Date(order?.createdAt).toLocaleDateString()}</td>
                 <td className="p-3 text-center">
                   <button
-                    onClick={() => setSelectedOrder(order)}
+                    onClick={() =>{setSelectedOrder(order)
+                      // console.log(order)
+                    }}
                     className="text-blue-600 hover:underline text-sm"
                   >
                     More Info
