@@ -24,6 +24,8 @@ export default function EditProductModal({
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [availableColors, setAvailableColors] = useState([...product?.avilableColors || []])
+  const [newCategory, setNewCategory] = useState("");
+
 
   useEffect(() => {
     setFormData({ ...product });
@@ -81,7 +83,7 @@ export default function EditProductModal({
         inStocks: Number(formData.inStocks),
         coverImage,
         images,
-        avilableColors : availableColors
+        avilableColors: availableColors
       };
 
       const res: any = await updateProduct(token, formData._id, payload);
@@ -97,6 +99,23 @@ export default function EditProductModal({
       setMessage("❌ Failed to update product.");
     }
     setLoading(false);
+  };
+
+    const handleAddToArray = (key: string, value: string) => {
+    if (!value) return;
+    setFormData((prev:any) => ({
+      ...prev,
+      [key]: [...(prev[key as keyof typeof formData] as string[]), value],
+    }));
+  };
+
+  const handleRemoveFromArray = (key: string, value: string) => {
+    setFormData((prev:any) => ({
+      ...prev,
+      [key]: (prev[key as keyof typeof formData] as string[]).filter(
+        (item) => item !== value
+      ),
+    }));
   };
 
 
@@ -171,9 +190,43 @@ export default function EditProductModal({
           />
         </div>
 
-        <ColorManager 
-        availableColors={availableColors} setAvailableColors={setAvailableColors}
-      />
+        <ColorManager
+          availableColors={availableColors} setAvailableColors={setAvailableColors}
+        />
+
+        <div>
+          <label className="block mb-1 font-medium">Categories</label>
+          <div className="flex gap-2 flex-col sm:flex-row">
+            <input
+              type="text"
+              value={newCategory}
+              onChange={(e) => setNewCategory(e.target.value)}
+              placeholder="Enter category"
+              className="flex-1 border px-3 py-2 rounded"
+            />
+            <button
+              type="button"
+              onClick={() => {
+                handleAddToArray("categories", newCategory);
+                setNewCategory("");
+              }}
+              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+            >
+              Add
+            </button>
+          </div>
+          <div className="flex flex-wrap gap-2 mt-2">
+            {formData.categories.map((cat:any, i:number) => (
+              <span
+                key={i}
+                className="bg-gray-200 text-sm px-3 py-1 rounded-full cursor-pointer"
+                onClick={() => handleRemoveFromArray("categories", cat)}
+              >
+                {cat} ❌
+              </span>
+            ))}
+          </div>
+        </div>
 
 
         {/* Cover Image */}
